@@ -50,7 +50,8 @@ void UPhysicsMovementComponent::ApplyRandomImpulse()
 	}
 
 	const FVector RandMoveVector = FMath::VRand();
-	const FVector ImpulseVector = RandMoveVector * ForceMagnitude;
+	const float ImpulseMagnitude = FMath::FRandRange(MinImpulseMagnitude, MaxImpulseMagnitude);
+	const FVector ImpulseVector = RandMoveVector * ImpulseMagnitude;
 	OwnerPhysicsRoot->AddImpulse(ImpulseVector);
 }
 

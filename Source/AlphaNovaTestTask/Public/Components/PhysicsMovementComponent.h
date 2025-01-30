@@ -25,14 +25,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Force Params")
 	float MaxSpeedByForce = 750.f;
 
-	/*
-	*	Should be set in the owner's object constructor
-	*/
+	// Should be set in the owner's object constructor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Impulse Params")
 	bool bShouldApplyRandomImpulse = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Impulse Params")
 	float ImpulseApplyingFrequency = 3.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Impulse Params")
+	float MinImpulseMagnitude = 5000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Impulse Params")
+	float MaxImpulseMagnitude = 12500.f;
 
 protected:
 	virtual void BeginPlay() override;

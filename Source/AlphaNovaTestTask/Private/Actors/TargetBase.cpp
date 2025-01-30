@@ -41,7 +41,11 @@ void ATargetBase::BeginPlay()
 
 void ATargetBase::OnCollisionBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
+	/*
+	* Overlap logic should be implemented in child classes. I could implement here default
+	* logic for clear targets because clearer targets use it when they are expired,
+	* but this event may have some must-have base logic for all its children
+	*/
 }
 
 void ATargetBase::SetDyed(bool bInDyed)

@@ -5,12 +5,18 @@ AClearerTarget::AClearerTarget()
 	OriginColor = FLinearColor::Green;
 }
 
+void AClearerTarget::SetExpired(bool bInExpired)
+{
+	bExpired = true;
+	OnClearerTargetExpired.Broadcast(this);
+}
+
 void AClearerTarget::Dye(const FLinearColor& DyeColor)
 {
 	Super::Dye(DyeColor);
 
 	// As soon as it's dyed with the Player Marker, it becomes expired and will act as a clear target
-	bExpired = true;
+	SetExpired(true);
 	OriginColor = BaseTargetColor;
 	UE_LOG(LogTemp, Warning, TEXT("%s : Clearer target has been dyed and transformed to a clear target"), *GetActorLabel());
 }
