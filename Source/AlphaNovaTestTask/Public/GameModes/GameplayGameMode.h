@@ -6,7 +6,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClearerTargetsLeftChangedSignature, int32, ClearerTargetsLeft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClearTargetsDyedChangedSignature, int32, ClearTargetsDyed);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClearTargetsAmountChangedSignature, int32, ClearTargetsAmount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameEndSignature);
 
 class AClearerTarget;
 
@@ -23,7 +23,16 @@ public:
 	FOnClearTargetsDyedChangedSignature OnClearTargetsDyedChanged;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnClearTargetsAmountChangedSignature OnClearTargetsAmountChanged;
+	FOnGameEndSignature OnGameEnd;
+
+	UFUNCTION(BlueprintPure)
+	int32 GetTargetsAmount() const;
+
+	UFUNCTION(BlueprintPure)
+	int32 GetClearTargetsDyed() const;
+
+	UFUNCTION(BlueprintPure)
+	int32 GetClearerTargetsLeft() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,17 +49,22 @@ protected:
 	UFUNCTION()
 	void HandleTargetDyedStatusChanged(bool bTargetDyedStatus);
 
+	/*
+	*	Data below could be moved to a separate game state class, but as long
+	*	as the game is singleplayer, we're fine
+	*/
 	void SetClearerTargetsLeft(int32 InClearerTargetsLeft);
-	void SetClearTargetsAmount(int32 InClearTargetsAmount);
 	void SetClearTargetsDyed(int32 InClearTargetsDyed);
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Gameplay")
 	int32 ClearerTargetsLeft = 0;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Gameplay")
-	int32 ClearTargetsAmount = 0;
+	int32 TargetsAmount = 0;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Gameplay")
 	int32 ClearTargetsDyed = 0;
+
+	bool bHasGameAlreadyEnded = false;
 
 };

@@ -22,6 +22,7 @@ void AGameplayGameMode::InitGameData()
 		{
 			ClearerTarget->OnClearerTargetExpired.AddDynamic(this, &ThisClass::HandleClearerTargetExpired);
 			ClearerTargetsLeft++;
+			TargetsAmount++;
 		}
 		else
 		{
@@ -29,10 +30,25 @@ void AGameplayGameMode::InitGameData()
 			if (IsValid(ClearTarget))
 			{
 				ClearTarget->OnTargetDyedChanged.AddDynamic(this, &ThisClass::HandleTargetDyedStatusChanged);
-				ClearTargetsAmount++;
+				TargetsAmount++;
 			}
 		}
 	}
+}
+
+int32 AGameplayGameMode::GetTargetsAmount() const
+{
+	return TargetsAmount;
+}
+
+int32 AGameplayGameMode::GetClearTargetsDyed() const
+{
+	return ClearTargetsDyed;
+}
+
+int32 AGameplayGameMode::GetClearerTargetsLeft() const
+{
+	return ClearerTargetsLeft;
 }
 
 void AGameplayGameMode::HandleClearerTargetExpired(AClearerTarget* ExpiredClearerTarget)
@@ -41,7 +57,6 @@ void AGameplayGameMode::HandleClearerTargetExpired(AClearerTarget* ExpiredCleare
 	{
 		ExpiredClearerTarget->OnClearerTargetExpired.RemoveDynamic(this, &ThisClass::HandleClearerTargetExpired);
 		SetClearerTargetsLeft(ClearerTargetsLeft - 1);
-		SetClearTargetsAmount(ClearTargetsAmount + 1);
 		SetClearTargetsDyed(ClearTargetsDyed + 1);
 		ExpiredClearerTarget->OnTargetDyedChanged.AddDynamic(this, &ThisClass::HandleTargetDyedStatusChanged);
 		HandleWinCondition();
@@ -60,12 +75,6 @@ void AGameplayGameMode::SetClearerTargetsLeft(int32 InClearerTargetsLeft)
 	OnClearerTargetsLeftChanged.Broadcast(ClearerTargetsLeft);
 }
 
-void AGameplayGameMode::SetClearTargetsAmount(int32 InClearTargetsAmount)
-{
-	ClearTargetsAmount = InClearTargetsAmount;
-	OnClearTargetsAmountChanged.Broadcast(ClearTargetsAmount);
-}
-
 void AGameplayGameMode::SetClearTargetsDyed(int32 InClearTargetsDyed)
 {
 	ClearTargetsDyed = InClearTargetsDyed;
@@ -74,7 +83,7 @@ void AGameplayGameMode::SetClearTargetsDyed(int32 InClearTargetsDyed)
 
 void AGameplayGameMode::HandleWinCondition()
 {
-	if (IsWinConditionMet())
+	if (IsWinConditionMet() && !bHasGameAlreadyEnded)
 	{
 		HandleGameEnd();
 	}
@@ -82,10 +91,12 @@ void AGameplayGameMode::HandleWinCondition()
 
 bool AGameplayGameMode::IsWinConditionMet()
 {
-	return ClearerTargetsLeft == 0 && ClearTargetsDyed == ClearTargetsAmount;
+	return ClearerTargetsLeft == 0 && ClearTargetsDyed == TargetsAmount;
 }
 
 void AGameplayGameMode::HandleGameEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("You've won!!!"));
+	bHasGameAlreadyEnded = true;
+	OnGameEnd.Broadcast();
 }
