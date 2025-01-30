@@ -7,7 +7,7 @@ UPhysicsMovementComponent::UPhysicsMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-
+	
 }
 
 void UPhysicsMovementComponent::BeginPlay()
@@ -27,6 +27,31 @@ void UPhysicsMovementComponent::BeginPlay()
 		UE_LOG(LogPhysicsMovementComponent, Warning, TEXT("%hs: Invalid root component! PhysicsMovementComponent works only with UPrimitiveComponent component as a root"), __FUNCTION__);
 		return;
 	}
+
+	if (bShouldApplyRandomImpulse)
+	{
+		InitImpulseMovement();
+	}
+}
+
+void UPhysicsMovementComponent::InitImpulseMovement()
+{
+	UWorld* World = GetWorld();
+	check(IsValid(World));
+	World->GetTimerManager().SetTimer(ImpulseApplyingTimerHandler, this, &ThisClass::ApplyRandomImpulse, ImpulseApplyingFrequency, true);
+}
+
+void UPhysicsMovementComponent::ApplyRandomImpulse()
+{
+	if (!IsValid(OwnerPhysicsRoot))
+	{
+		UE_LOG(LogPhysicsMovementComponent, Warning, TEXT("%hs: Invalid root component"), __FUNCTION__);
+		return;
+	}
+
+	const FVector RandMoveVector = FMath::VRand();
+	const FVector ImpulseVector = RandMoveVector * ForceMagnitude;
+	OwnerPhysicsRoot->AddImpulse(ImpulseVector);
 }
 
 void UPhysicsMovementComponent::MoveByForce(const FVector& MoveVector)

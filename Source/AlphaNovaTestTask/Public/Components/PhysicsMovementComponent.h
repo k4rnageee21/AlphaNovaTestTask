@@ -19,17 +19,33 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveByForce(const FVector& MoveVector);
 
-protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Force Params")
 	float ForceMagnitude = 10000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Force Params")
 	float MaxSpeedByForce = 750.f;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Force Params")
+	/*
+	*	Should be set in the owner's object constructor
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Impulse Params")
+	bool bShouldApplyRandomImpulse = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Impulse Params")
+	float ImpulseApplyingFrequency = 3.f;
+
+protected:
+	virtual void BeginPlay() override;
+
+	void InitImpulseMovement();
+
+	UFUNCTION()
+	void ApplyRandomImpulse();
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TObjectPtr<UPrimitiveComponent> OwnerPhysicsRoot;
+
+	FTimerHandle ImpulseApplyingTimerHandler;
 
 private:
 
