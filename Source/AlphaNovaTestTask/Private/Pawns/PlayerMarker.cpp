@@ -7,11 +7,15 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Helpers/MaterialInstanceDynamicHelper.h"
 #include "InputActionValue.h"
+#include "Interfaces/Dyeable.h"
+
+DEFINE_LOG_CATEGORY(LogPlayerMarker);
 
 APlayerMarker::APlayerMarker()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -39,13 +43,6 @@ APlayerMarker::APlayerMarker()
 void APlayerMarker::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	
-}
-
-void APlayerMarker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	APlayerController* PlayerController = GetController<APlayerController>();
 	if (IsValid(PlayerController))
@@ -56,6 +53,24 @@ void APlayerMarker::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	MaterialInstanceDynamic = UMaterialInstanceDynamicHelper::CreateMaterialInstanceOnMesh(Mesh);
+	if (IsValid(MaterialInstanceDynamic))
+	{
+		UMaterialInstanceDynamicHelper::SetMaterialInstanceColor(MaterialInstanceDynamic, MarkColor);
+	}
+	else
+	{
+		UE_LOG(LogPlayerMarker, Warning, TEXT("%hs: Can't create material dynamic instance!"), __FUNCTION__);
+	}
+	
+	// We're doing this on overlap collision because a hit event generation during physics simulation isn't the optimal way
+	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnCollisionSphereOverlap);
+}
+
+void APlayerMarker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (IsValid(EnhancedInputComponent))
@@ -93,5 +108,20 @@ void APlayerMarker::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookVector.X);
 		AddControllerPitchInput(LookVector.Y);
+	}
+}
+
+void APlayerMarker::OnCollisionSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	IDyeable* Dyeable = Cast<IDyeable>(OtherActor);
+	if (!Dyeable)
+	{
+		return;
+	}
+
+	// The player marker should always dye other targets if they are not already dyed
+	if (!Dyeable->IsDyed())
+	{
+		Dyeable->Dye(MarkColor);
 	}
 }
