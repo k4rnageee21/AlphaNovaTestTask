@@ -1,5 +1,6 @@
 #include "Pawns/PlayerMarker.h"
 #include "Camera/CameraComponent.h"
+#include "Components/PhysicsMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"
@@ -10,7 +11,7 @@
 
 APlayerMarker::APlayerMarker()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -22,6 +23,8 @@ APlayerMarker::APlayerMarker()
 
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	CollisionSphere->SetupAttachment(RootComponent);
+	
+	PhysicsMovement = CreateDefaultSubobject<UPhysicsMovementComponent>(TEXT("PhysicsMovement"));
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -37,7 +40,7 @@ void APlayerMarker::BeginPlay()
 {
 	Super::BeginPlay();
 	
-
+	
 }
 
 void APlayerMarker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -72,12 +75,12 @@ void APlayerMarker::Move(const FInputActionValue& Value)
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		if (IsValid(Mesh))
+		if (IsValid(PhysicsMovement))
 		{
-			FVector ForwardForceVector = ForwardDirection * MoveVector.Y * 10000.f;
-			FVector RightForceVector = RightDirection * MoveVector.X * 10000.f;
-			Mesh->AddForce(ForwardForceVector);
-			Mesh->AddForce(RightForceVector);
+			FVector ForwardMoveVector = ForwardDirection * MoveVector.Y;
+			FVector RightMoveVector = RightDirection * MoveVector.X;
+			PhysicsMovement->MoveByForce(ForwardMoveVector);
+			PhysicsMovement->MoveByForce(RightMoveVector);
 		}
 	}
 }
