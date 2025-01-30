@@ -6,8 +6,6 @@ DEFINE_LOG_CATEGORY(LogPhysicsMovementComponent);
 UPhysicsMovementComponent::UPhysicsMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
-	
 }
 
 void UPhysicsMovementComponent::BeginPlay()

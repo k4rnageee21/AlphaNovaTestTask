@@ -1,5 +1,6 @@
 #include "UI/HUDs/GameplayHUD.h"
 #include "GameFramework/PlayerController.h"
+#include "UI/Widgets/GameEndWidget.h"
 #include "UI/Widgets/TargetsWidget.h"
 
 void AGameplayHUD::BeginPlay()
@@ -21,6 +22,26 @@ void AGameplayHUD::AddTargetsWidget()
 	{
 		TargetsWidget->AddToViewport(TargetsWidgetOrderZ);
 	}
+}
+
+void AGameplayHUD::AddGameEndWidget()
+{
+	if (!IsValid(GameEndWidgetClass))
+	{
+		return;
+	}
+
+	GameEndWidget = CreateWidget<UGameEndWidget>(GetOwningPlayerController(), GameEndWidgetClass);
+	if (IsValid(GameEndWidget))
+	{
+		GameEndWidget->AddToViewport(GameEndWidgetOrderZ);
+		GameEndWidget->OnRestartButtonClicked.AddDynamic(this, &ThisClass::HandleGameEndMenuRestartButtonClicked);
+	}
+}
+
+void AGameplayHUD::HandleGameEndMenuRestartButtonClicked()
+{
+	OnGameEndMenuRestartButtonClicked.Broadcast();
 }
 
 void AGameplayHUD::SetClearerTargetsLeft(int32 InClearerTargetsLeft)

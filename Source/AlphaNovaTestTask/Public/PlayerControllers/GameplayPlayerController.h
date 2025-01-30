@@ -11,10 +11,18 @@ UCLASS(Abstract)
 class ALPHANOVATESTTASK_API AGameplayPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetUIModeInput();
+
+	UFUNCTION(BlueprintCallable)
+	void SetGameplayModeInput();
 	
 protected:
 	virtual void BeginPlay() override;
 
+	void InitPlayerController();
 	void InitHUD();
 
 	UFUNCTION()
@@ -22,6 +30,12 @@ protected:
 
 	UFUNCTION()
 	void HandleClearTargetsDyedChanged(int32 ClearTargetsDyed);
+
+	UFUNCTION()
+	void HandleGameEnd();
+
+	UFUNCTION()
+	void HandleGameEndMenuRestartButtonClicked();
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AGameplayHUD> GameplayHUD;
